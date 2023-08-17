@@ -1,0 +1,76 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block date %}
+<div class="col-sm-4">
+  <form class="row" action={% url 'home' %} method="POST" id="post-form">
+    {% csrf_token %}
+    
+    <div class="d-flex align-items-start mb-3">
+        <div class="p-2 bd-highlight">
+          <div class="input-group date" id="datepicker">
+            <input type="text" class="form-control" id="date" placeholder={{data1}} name="currdate" />
+            <span class="input-group-append">
+              <span class="input-group-text bg-light d-block">
+                <i class="fa fa-calendar"></i>
+              </span>
+            </span>
+          </div>           
+        </div>
+        <div class="p-2 bd-highlight">
+          <div class="form-check form-switch">
+            {%if data3 == "on" %}
+            <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="toggler" checked>
+            {% else %}
+            <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="toggler">
+            {% endif %}
+            <label class="form-check-label" for="flexSwitchCheckChecked">Working Hours</label>
+          </div>
+        </div>
+        <div class="p-2 bd-highlight">
+          <button type="submit">Submit</button>
+        </div>
+    </div>
+  </form>
+</div>
+{% endblock date %}
+
+{% block content %}
+
+<div class="col-sm-12">
+    <h3 class="my-5">Home Page</h3>
+    <div class="my-5">
+      Current date = {{data1}}<br>
+      date with time = {{data2}}<br>
+      status = {{data3}}<br>
+    </div>   
+
+    <div class="row">
+      {% for name, counts in data4.items %}      
+      <div class="col-sm-3 my-3">
+        <div class="card">
+          <div class="card-body">
+            <h4>{{name}}</h4>
+            <p>Idle Time : {{counts.Idle}}</p>
+            <p>Pro Time : {{counts.PRO}}</p>
+            <p>Unpro Time : {{counts.UNPRO}}</p>
+            <p>LogIn Time: {{counts.login}}</p>
+            <p>LogOut Time: {{counts.logout}}</p>
+            <div class="ct-chart ct-golden-section" id="chart{{name}}"></div>
+          </div>
+        </div>
+      </div> 
+      <script src="https://cdn.jsdelivr.net/npm/chartist@0.11.4/dist/chartist.min.js"></script> 
+      <script>
+        var iterate = document.getElementById("chart{{name}}"); 
+        console.log(iterate)
+        new Chartist.Pie(iterate, {
+          labels: ['pro','unpro','idle'],
+          series: [12, 9, 7]
+        });
+      </script>
+      {% endfor %}
+      
+    </div>
+</div>
+{% endblock content %}
