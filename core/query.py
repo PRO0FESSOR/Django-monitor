@@ -131,13 +131,13 @@ def getGlanceValues():
 
     for name,status,count in results:
         if name not in user_counts:
-            user_counts[name]={'Idle':0,'PRO':0,"UNPRO":0, 'login': '', 'logout': ''}
+            user_counts[name]={'Idle':0,'PRO':0,"UNPRO":0, 'login': '', 'logout': '','PIdle':0,'PPRO':0,'PUNPRO':0}
         user_counts[name][status]=count
 
     for name,counts in user_counts.items():
-        counts['Idle'] = convertCountToTime(counts['Idle'])
-        counts['PRO'] = convertCountToTime(counts['PRO'])
-        counts['UNPRO'] = convertCountToTime(counts['UNPRO'])
+        counts['PIdle'] = convertCountToTime(counts['Idle'])
+        counts['PPRO'] = convertCountToTime(counts['PRO'])
+        counts['PUNPRO'] = convertCountToTime(counts['UNPRO'])
 
     for name , login ,logout in logg_values:
         if name in user_counts:

@@ -51,23 +51,34 @@
         <div class="card">
           <div class="card-body">
             <h4>{{name}}</h4>
-            <p>Idle Time : {{counts.Idle}}</p>
-            <p>Pro Time : {{counts.PRO}}</p>
-            <p>Unpro Time : {{counts.UNPRO}}</p>
+            <p>Idle Time : {{counts.PIdle}}</p>
+            <p>Pro Time : {{counts.PPRO}}</p>
+            <p>Unpro Time : {{counts.PUNPRO}}</p>
             <p>LogIn Time: {{counts.login}}</p>
             <p>LogOut Time: {{counts.logout}}</p>
-            <div class="ct-chart ct-golden-section" id="chart{{name}}"></div>
+            <div id="chart{{ name }}"></div>
+            <a href={% url 'description' user=name %} class="btn btn-primary">More..</a>
           </div>
         </div>
       </div> 
-      <script src="https://cdn.jsdelivr.net/npm/chartist@0.11.4/dist/chartist.min.js"></script> 
+      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
       <script>
-        var iterate = document.getElementById("chart{{name}}"); 
-        console.log(iterate)
-        new Chartist.Pie(iterate, {
-          labels: ['pro','unpro','idle'],
-          series: [12, 9, 7]
-        });
+        var data = [
+          {
+            labels: ["Pro", "Unpro", "Idle"],
+            values: [{{ counts.PRO }}, {{ counts.UNPRO }}, {{ counts.Idle }}],
+            type: "pie",
+            marker: {
+              colors: ["#FF6384", "#36A2EB", "#FFCE56"],
+            },
+          },
+        ];
+
+        var layout = {
+          title: "{{ name }}'s Pie Chart",
+        };
+
+        Plotly.newPlot("chart{{ name }}", data, layout);
       </script>
       {% endfor %}
       

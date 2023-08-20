@@ -43,9 +43,20 @@ def home(request):
             print(toggle_value)
 
         if datecurr:
-            updateSelectedDate(datecurr)
-            print(datecurr)
+            input_format = "%m/%d/%Y"
+            output_format = "%Y-%m-%d"
+            date_object = datetime.strptime(datecurr, input_format)
+            formatted_date = date_object.strftime(output_format)
+            updateSelectedDate(formatted_date)
+            print(formatted_date)
             
         toggleSwitchStatus(toggle_value)      
    
+        
+    
     return render(request,'core/home.html',{"data2":getFromToDT(),"data1":getSelectedDate(),"data3":getSwitchStatus(),"toggle_value":toggle_value,"data4":getGlanceValues(),"data5":log_values()})
+
+#description 
+
+def description(request,user):
+    return render(request,'core/description.html',{"name":user})

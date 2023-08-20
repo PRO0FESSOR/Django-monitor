@@ -22,5 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/',views.login,name="login"),
     path('',views.home,name="home"),
-    # path('toggle/', views.toggle_view, name='toggle_view'),
+    path('description/<str:user>/',views.description,name="description")
+    
 ]
