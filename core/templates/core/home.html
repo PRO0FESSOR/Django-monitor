@@ -1,40 +1,6 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block date %}
-<div class="col-sm-4">
-  <form class="row" action={% url 'home' %} method="POST" id="post-form">
-    {% csrf_token %}
-    
-    <div class="d-flex align-items-start mb-3">
-        <div class="p-2 bd-highlight">
-          <div class="input-group date" id="datepicker">
-            <input type="text" class="form-control" id="date" placeholder={{data1}} name="currdate" />
-            <span class="input-group-append">
-              <span class="input-group-text bg-light d-block">
-                <i class="fa fa-calendar"></i>
-              </span>
-            </span>
-          </div>           
-        </div>
-        <div class="p-2 bd-highlight">
-          <div class="form-check form-switch">
-            {%if data3 == "on" %}
-            <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="toggler" checked>
-            {% else %}
-            <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="toggler">
-            {% endif %}
-            <label class="form-check-label" for="flexSwitchCheckChecked">Working Hours</label>
-          </div>
-        </div>
-        <div class="p-2 bd-highlight">
-          <button type="submit">Submit</button>
-        </div>
-    </div>
-  </form>
-</div>
-{% endblock date %}
-
 {% block content %}
 
 <div class="col-sm-12">
@@ -45,22 +11,31 @@
       status = {{data3}}<br>
     </div>   
 
+    {% comment %} card code  {% endcomment %}
+    
     <div class="row">
       {% for name, counts in data4.items %}      
-      <div class="col-sm-3 my-3">
-        <div class="card">
+      <div class="col-sm-4 my-2">
+        <div class="card" style="border-radius: 50px;">
           <div class="card-body">
-            <h4>{{name}}</h4>
-            <p>Idle Time : {{counts.PIdle}}</p>
-            <p>Pro Time : {{counts.PPRO}}</p>
-            <p>Unpro Time : {{counts.PUNPRO}}</p>
-            <p>LogIn Time: {{counts.login}}</p>
-            <p>LogOut Time: {{counts.logout}}</p>
-            <div id="chart{{ name }}"></div>
-            <a href={% url 'description' user=name %} class="btn btn-primary">More..</a>
-          </div>
+            <h1>{{name}}</h1>
+            <div class="d-flex justify-content-between" >
+              <div style=" width: 500px; height: 200px;" class="my-5">
+                <h5>Idle Time : {{counts.PIdle}}</h5>
+                <h5>Pro Time : {{counts.PPRO}}</h5>
+                <h5>Unpro Time : {{counts.PUNPRO}}</h5>
+                <h5>LogIn Time: {{counts.login}}</h5>
+                <h5>LogOut Time: {{counts.logout}}</h5>
+                </div>
+                <div  style="width: 500px; height: 200px;" id="chart{{ name }}"></div>
+              </div>
+              <a href={% url 'description' user=name %} class="btn btn-primary">More..</a>
+            </div>            
         </div>
       </div> 
+
+      {% comment %} chart script {% endcomment %}
+
       <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
       <script>
         var data = [
@@ -68,20 +43,33 @@
             labels: ["Pro", "Unpro", "Idle"],
             values: [{{ counts.PRO }}, {{ counts.UNPRO }}, {{ counts.Idle }}],
             type: "pie",
+            hole: 0.5,
             marker: {
               colors: ["#FF6384", "#36A2EB", "#FFCE56"],
             },
+            textinfo: 'none', 
           },
         ];
 
         var layout = {
-          title: "{{ name }}'s Pie Chart",
+          title: "{{name}} Chart",
+          width: 250,  
+          height: 250,
+          {% comment %} showlegend: false,  {% endcomment %}
         };
 
-        Plotly.newPlot("chart{{ name }}", data, layout);
+        var config = {
+          displayModeBar: false, // Hide the top-right corner options
+          responsive: true, // Make the chart responsive
+          staticPlot: true, // Disable interactivity like hover and zoom
+        };
+
+        Plotly.newPlot("chart{{ name }}", data, layout,config);
       </script>
       {% endfor %}
       
     </div>
 </div>
+
 {% endblock content %}
+

@@ -1,11 +1,120 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    hello  {{name}}
-</body>
-</html>
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block contentt %}
+
+<div class="col-sm-12">
+
+  {% comment %} card code  {% endcomment %}
+
+    <div class="d-flex justify-content-between my-5">
+        <div>
+            <h1>{{ user_data.id }}</h1><br>
+            <h4>Idle Time : {{ user_data.PIdle }}</h4>
+            <h4>Pro Time : {{ user_data.PPRO }}</h4>
+            <h4>Unpro Time : {{ user_data.PUNPRO }}</h4>
+            <h4>Login Time : {{ user_data.login }}</h4>
+            <h4>Logout Time : {{ user_data.logout }}</h4>
+        </div>
+        <div id="chart{{ user_data.id }}"></div>
+    </div>  
+    
+    {% comment %} chart code  {% endcomment %}
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script>
+        var data = [
+          {
+            labels: ["Pro", "Unpro", "Idle"],
+            values: [{{ user_data.PRO  }}, {{ user_data.UNPRO }}, {{ user_data.Idle }}],
+            type: "pie",
+            marker: {
+              colors: ["#FF6384", "#36A2EB", "#FFCE56"],
+            },
+          },
+        ];
+
+        var layout = {
+            title: "{{ user_data.id  }}'s Pie Chart",
+            width: 500,  
+            height: 500,
+        };
+
+        Plotly.newPlot("chart{{ user_data.id }}", data, layout);
+    </script>
+
+    {% comment %} rdp table  {% endcomment %}
+
+    <h3>RDP SESSIONS :</h3><BR>
+
+    <table class="table table-bordered my-3">
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">RDP Process Title</th>
+            <th scope="col">RDP Process Name</th>
+            <th scope="col">RDP Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for data in rdpdata %}
+          <tr>
+            <td>{{data.0}}</td>
+            <td>{{data.1}}</td>
+            <td>{{data.2}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+
+    {% comment %} browsing table  {% endcomment %}
+
+    <h3>BROWSING SESSIONS :</h3><BR>
+
+    <table class="table table-bordered my-3">
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">Browsing Title</th>
+            <th scope="col">Browsing Process</th>
+            <th scope="col">Browsing Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for data in brdata %}
+          <tr>
+            <td>{{data.0}}</td>
+            <td>{{data.1}}</td>
+            <td>{{data.2}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+
+    {% comment %} day usage table  {% endcomment %}
+
+    <h3>DAY USAGE :</h3><BR>
+      
+    <table class="table table-bordered my-3">
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">Process Title</th>
+            <th scope="col">Process Name</th>
+            <th scope="col">Time Usage</th>
+            <th scope="col">Pro/UnPro Task</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for data in prdata %}
+          <tr>
+            <td>{{data.0}}</td>
+            <td>{{data.1}}</td>
+            <td>{{data.2}}</td>
+            <td>{{data.3}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+    </table>    
+
+</div>
+
+{% endblock contentt %}  

@@ -33,16 +33,22 @@
     <div class="container-fluid my-3  " >
       {% include 'core/navbar.html'%}
     </div>
+    <div class="container-fluid">
+      {% include 'core/filter.html'%}
+    </div> 
     <div class="container">
       <div class="row">
         {% block date %}{% endblock date %}
-        {% block toggle %}{% endblock toggle %}
-        {% block search %}{% endblock search %}
       </div>     
     </div>
     <div class="container-fluid">
         <div class="row">
             {% block content %}{% endblock content %}
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            {% block contentt %}{% endblock contentt %}
         </div>
     </div>
 

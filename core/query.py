@@ -17,8 +17,8 @@ def getFromToDT():
         single_value = cursor.fetchone()
         return single_value
 
-def updateSelectedDate(date):
-    query4 = f"UPDATE tblselecteddate SET currentDate = '{date}';"
+def updateSelectedDate(from_date,to_date):
+    query4 = f"UPDATE tblselecteddate SET currentDate = '{from_date}';"
     existing_from_dt, existing_to_dt = getFromToDT()
     if existing_from_dt and existing_to_dt:
         # Split the existing time from the output ('2023-07-13 00:00:01', '2023-07-13 23:59:59')
@@ -26,8 +26,8 @@ def updateSelectedDate(date):
         existing_to_time = existing_to_dt.split()[1]
 
         # Combine the updated date with the existing time
-        from_dt_tobeupdated = f"{date} {existing_from_time}"
-        to_dt_tobeupdated = f"{date} {existing_to_time}"
+        from_dt_tobeupdated = f"{from_date} {existing_from_time}"
+        to_dt_tobeupdated = f"{to_date} {existing_to_time}"
 
         # Update the data in the database
         query5 = f"UPDATE tbldtspan SET fromDT = '{from_dt_tobeupdated}';"
@@ -131,7 +131,7 @@ def getGlanceValues():
 
     for name,status,count in results:
         if name not in user_counts:
-            user_counts[name]={'Idle':0,'PRO':0,"UNPRO":0, 'login': '', 'logout': '','PIdle':0,'PPRO':0,'PUNPRO':0}
+            user_counts[name]={'id':'','Idle':0,'PRO':0,"UNPRO":0, 'login': '', 'logout': '','PIdle':0,'PPRO':0,'PUNPRO':0}
         user_counts[name][status]=count
 
     for name,counts in user_counts.items():
@@ -143,10 +143,89 @@ def getGlanceValues():
         if name in user_counts:
             user_counts[name]['login'] = login
             user_counts[name]['logout'] = logout
-
-    print(user_counts)
+            user_counts[name]['id'] = name
 
     return user_counts
+
+
+def rdpSessions(user):
+ 
+    existing_from_dt, existing_to_dt = getFromToDT()
+    
+    query10 = f"""
+        SELECT 
+            PROCESS_TITLE AS title,
+            PROCESS_NAME AS rdpProcessName,
+            COUNT(*) AS rdpUsage
+        FROM 
+            tblproworkingdetails
+        WHERE 
+            USER_ID = '{user}'
+            AND SYNC_TIME > '{existing_from_dt}'
+            AND SYNC_TIME < '{existing_to_dt}'
+            AND PROCESS_NAME LIKE '%mstsc%'
+            AND PROCESS_TITLE <> ''
+            AND PROCESS_TITLE <> 'Remote Desktop Connection'
+        GROUP BY 
+            PROCESS_TITLE, PROCESS_NAME
+        ORDER BY 
+            rdpUsage ASC;
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query10)
+        single_value = cursor.fetchall()
+
+        return single_value 
+    
+
+def browsingSessions(user):
+ 
+    existing_from_dt, existing_to_dt = getFromToDT()
+    
+    query11 = f"""
+    SELECT PROCESS_TITLE as title,
+                GROUP_CONCAT(DISTINCT PROCESS_NAME ORDER BY PROCESS_NAME ASC) as browsingProcessName,
+                COUNT(*) as browsingUsage
+        FROM tblproworkingdetails
+        WHERE USER_ID = '{user}'
+        AND SYNC_TIME > '{existing_from_dt}'
+        AND SYNC_TIME < '{existing_to_dt}'
+        AND PRO_TYPE = 'BROWSING'
+        AND PROCESS_TITLE <> ''
+        GROUP BY PROCESS_TITLE
+        ORDER BY browsingUsage ASC;
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query11)
+        single_value = cursor.fetchall()
+
+    return single_value
+
+def processSessions(user):
+ 
+    existing_from_dt, existing_to_dt = getFromToDT()
+    
+    query12 = f"""
+        SELECT PROCESS_TITLE as title,
+                    GROUP_CONCAT(DISTINCT PROCESS_NAME ORDER BY PROCESS_NAME ASC) as ProcessName,
+                    COUNT(*) as timeUsage,
+                    GROUP_CONCAT(DISTINCT RES1 ORDER BY RES1 ASC) as taskType
+            FROM tblproworkingdetails
+            WHERE USER_ID = '{user}'
+            AND SYNC_TIME > '{existing_from_dt}'
+            AND SYNC_TIME < '{existing_to_dt}'
+            GROUP BY PROCESS_TITLE
+            ORDER BY timeUsage ASC;
+
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query12)
+        single_value = cursor.fetchall()
+
+    return single_value
 
 
 

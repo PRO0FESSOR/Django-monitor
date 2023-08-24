@@ -20,8 +20,10 @@ from core import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/',views.login,name="login"),
+    path('login/',views.user_login,name="login"),
+    path('logout/',views.user_logout,name="logout"),
     path('',views.home,name="home"),
-    path('description/<str:user>/',views.description,name="description")
+    path('description/<str:user>/',views.description,name="description"),
+    path('user_data/<str:emp_value>/', views.user_data, name='user_data')
     
 ]
