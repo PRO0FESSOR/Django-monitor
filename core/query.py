@@ -39,8 +39,13 @@ def updateSelectedDate(from_date,to_date):
 
     with connection.cursor() as cursor:
         cursor.execute(query4)
-        
 
+
+def gettodate():
+    existing_from_dt, existing_to_dt = getFromToDT()
+    existing_to_date = existing_to_dt.split()[0]
+    print(existing_to_date)
+    return existing_to_date
 
 def getSwitchStatus():
     query3 = "SELECT STATUS FROM tblhrsswitch;"
@@ -53,11 +58,11 @@ def getSwitchStatus():
 def toggleSwitchStatus(status):
     query7 = f"UPDATE tblhrsswitch SET STATUS = '{status}';"
     if status == "OFF":
-        NEW_FROM_TIME = "09:30:00"
-        NEW_TO_TIME = "19:00:00"
-    else:
         NEW_FROM_TIME = "00:00:01"
         NEW_TO_TIME = "23:59:59"
+    else:        
+        NEW_FROM_TIME = "09:30:00"
+        NEW_TO_TIME = "19:00:00"
     
     existing_from_dt, existing_to_dt = getFromToDT()
     if existing_from_dt and existing_to_dt:
@@ -80,152 +85,140 @@ def toggleSwitchStatus(status):
     with connection.cursor() as cursor:
         cursor.execute(query7)
 
-    
 
-def convertCountToTime(time_count):
-		time_sec = time_count * 10
-		time_h_mod = int(time_sec // 3600)
-		time_m_mod = int((time_sec - (time_h_mod * 3600)) // 60)
-		time_s_mod = int(time_sec - (time_h_mod * 3600) - (time_m_mod * 60))
-
-		if time_h_mod < 10:
-			time_h_mod = "0" + str(time_h_mod)
-		if time_m_mod < 10:
-			time_m_mod = "0" + str(time_m_mod)
-		if time_s_mod < 10:
-			time_s_mod = "0" + str(time_s_mod)
-
-		return f"{time_h_mod}:{time_m_mod}:{time_s_mod} (H)"
-
-def log_values():
+def glanceShortcut():
     existing_from_dt, existing_to_dt = getFromToDT()
+    existing_from_date = existing_from_dt.split()[0]
+    existing_to_date = existing_to_dt.split()[0]
+    print(existing_from_date,existing_to_date)
+    time = getSwitchStatus()
+    if time == "on":
+        query13 = f"""       
+        SELECT USERID,
+        TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(W_PROTIME))), '%H:%i:%s') AS total_protime,
+        TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(W_UNPROTIME))), '%H:%i:%s') AS total_unprotime,
+        TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(W_IDLETIME))), '%H:%i:%s') AS total_idletime,
+        MIN(W_INTIME) AS min_intime,
+        MAX(W_OUTTIME) AS max_outtime,
+        SUM(W_PROCOUNT) AS total_procount,
+        SUM(W_UNPROCOUNT) AS total_unprocount,
+        SUM(W_IDLECOUNT) AS total_idlecount
+        FROM newproworkingdetails_page1
+        WHERE DATE BETWEEN '{existing_from_date}' AND '{existing_to_date}'
+        GROUP BY USERID;
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query13)
+            results = cursor.fetchall()
 
-    query11 = f"""SELECT USER_ID , MIN(SYNC_TIME) as LOGIN, MAX(SYNC_TIME) as LOGOUT FROM tblproworkingdetails WHERE SYNC_TIME>'{existing_from_dt}' AND SYNC_TIME<'{existing_to_dt}' GROUP BY USER_ID; """
+        # print(results)
+    else:
+        query13 = f"""
+        SELECT USERID,
+        TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(PROTIME))), '%H:%i:%s') AS total_protime,
+        TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(UNPROTIME))), '%H:%i:%s') AS total_unprotime,
+        TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(IDLETIME))), '%H:%i:%s') AS total_idletime,
+        MIN(INTIME) AS min_intime,
+        MAX(OUTTIME) AS max_outtime,
+        SUM(PROCOUNT) AS total_procount,
+        SUM(UNPROCOUNT) AS total_unprocount,
+        SUM(IDLECOUNT) AS total_idlecount
+        FROM newproworkingdetails_page1
+        WHERE DATE BETWEEN '{existing_from_date}' AND '{existing_to_date}'
+        GROUP BY USERID;
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query13)
+            results = cursor.fetchall()
+            
+        # print(results)
+    return results
 
-    with connection.cursor() as cursor:
-        cursor.execute(query11)
-        results2=cursor.fetchall()
-
-    
-    formatted_results = []
-
-    for user_id, login, logout in results2:
-        formatted_results.append((user_id ,login.strftime('%H:%M:%S'), logout.strftime('%H:%M:%S')))
-    
-
-    return formatted_results
-
-def getGlanceValues():
-    cnt=0
+def onlyglanceShortcut(user):
     existing_from_dt, existing_to_dt = getFromToDT()
-    logg_values = log_values()
-    query10 = f"""
-        SELECT USER_ID , RES1 , COUNT(*) as cnt FROM tblproworkingdetails WHERE SYNC_TIME>'{existing_from_dt}' AND SYNC_TIME<'{existing_to_dt}' GROUP BY USER_ID ,RES1 ;
-    """
+    existing_from_date = existing_from_dt.split()[0]
+    existing_to_date = existing_to_dt.split()[0]
+    time = getSwitchStatus()
+    if time == "on":
+        query13 = f"""
+        SELECT USERID,
+            TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(W_PROTIME))), '%H:%i:%s') AS total_protime,
+            TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(W_UNPROTIME))), '%H:%i:%s') AS total_unprotime,
+            TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(W_IDLETIME))), '%H:%i:%s') AS total_idletime,
+            MIN(W_INTIME) AS min_intime,
+            MAX(W_OUTTIME) AS max_outtime,
+            SUM(W_PROCOUNT) AS total_procount,
+            SUM(W_UNPROCOUNT) AS total_unprocount,
+            SUM(W_IDLECOUNT) AS total_idlecount,
+            (SELECT IP FROM newproworkingdetails_page1 WHERE USERID = '{user}' AND DATE = '{existing_from_date}') AS ip,
+            (SELECT IP_LOCATION FROM newproworkingdetails_page1 WHERE USERID = '{user}' AND DATE = '{existing_from_date}') AS ip_location
+        FROM newproworkingdetails_page1
+        WHERE USERID = '{user}' AND DATE BETWEEN '{existing_from_date}' AND '{existing_to_date}'
+        GROUP BY USERID;
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query13)
+            results = cursor.fetchall()
+    else:
+        query13 = f"""
+        SELECT USERID,
+            TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(PROTIME))), '%H:%i:%s') AS total_protime,
+            TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(UNPROTIME))), '%H:%i:%s') AS total_unprotime,
+            TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(IDLETIME))), '%H:%i:%s') AS total_idletime,
+            MIN(INTIME) AS min_intime,
+            MAX(OUTTIME) AS max_outtime,
+            SUM(PROCOUNT) AS total_procount,
+            SUM(UNPROCOUNT) AS total_unprocount,
+            SUM(IDLECOUNT) AS total_idlecount,
+            (SELECT IP FROM newproworkingdetails_page1 WHERE USERID = '{user}' AND DATE = '{existing_from_date}') AS ip,
+            (SELECT IP_LOCATION FROM newproworkingdetails_page1 WHERE USERID = '{user}' AND DATE = '{existing_from_date}') AS ip_location
+        FROM newproworkingdetails_page1
+        WHERE USERID = '{user}' AND DATE BETWEEN '{existing_from_date}' AND '{existing_to_date}'
+        GROUP BY USERID;
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query13)
+            results = cursor.fetchall()
 
-    with connection.cursor() as cursor:
-        cursor.execute(query10)
-        results = cursor.fetchall()
-                
-    user_counts = {}
+    # print(results)
+            
 
-    for name,status,count in results:
-        if name not in user_counts:
-            user_counts[name]={'id':'','Idle':0,'PRO':0,"UNPRO":0, 'login': '', 'logout': '','PIdle':0,'PPRO':0,'PUNPRO':0}
-        user_counts[name][status]=count
-
-    for name,counts in user_counts.items():
-        counts['PIdle'] = convertCountToTime(counts['Idle'])
-        counts['PPRO'] = convertCountToTime(counts['PRO'])
-        counts['PUNPRO'] = convertCountToTime(counts['UNPRO'])
-
-    for name , login ,logout in logg_values:
-        if name in user_counts:
-            user_counts[name]['login'] = login
-            user_counts[name]['logout'] = logout
-            user_counts[name]['id'] = name
-
-    return user_counts
+    return results
 
 
-def rdpSessions(user):
- 
+#page2
+   
+def alltables(user):
     existing_from_dt, existing_to_dt = getFromToDT()
-    
-    query10 = f"""
-        SELECT 
-            PROCESS_TITLE AS title,
-            PROCESS_NAME AS rdpProcessName,
-            COUNT(*) AS rdpUsage
-        FROM 
-            tblproworkingdetails
-        WHERE 
-            USER_ID = '{user}'
-            AND SYNC_TIME > '{existing_from_dt}'
-            AND SYNC_TIME < '{existing_to_dt}'
-            AND PROCESS_NAME LIKE '%mstsc%'
-            AND PROCESS_TITLE <> ''
-            AND PROCESS_TITLE <> 'Remote Desktop Connection'
-        GROUP BY 
-            PROCESS_TITLE, PROCESS_NAME
-        ORDER BY 
-            rdpUsage ASC;
-    """
+    existing_from_date = existing_from_dt.split()[0]
+    existing_to_date = existing_to_dt.split()[0]
+    time = getSwitchStatus()
 
-    with connection.cursor() as cursor:
-        cursor.execute(query10)
-        single_value = cursor.fetchall()
+    if time == "on":
+        query14 = f"""           
+            SELECT TITLE, PROCESSNAME, PRO_TYPE, W_TIME_FOR_DAY, TASK_TYPE
+            FROM newproworkingdetails_page2
+            WHERE USERID = '{user}' AND DATE BETWEEN '{existing_from_date}' AND '{existing_to_date}'
+            ORDER BY W_TIME_FOR_DAY DESC;
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query14)
+            data = cursor.fetchall()
+    else:
+        query14 = f"""
+            SELECT TITLE, PROCESSNAME, PRO_TYPE, TIME_FOR_DAY, TASK_TYPE
+            FROM newproworkingdetails_page2
+            WHERE USERID = '{user}' AND DATE BETWEEN '{existing_from_date}' AND '{existing_to_date}'
+            ORDER BY TIME_FOR_DAY DESC;
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query14)
+            data = cursor.fetchall()
 
-        return single_value 
-    
 
-def browsingSessions(user):
- 
-    existing_from_dt, existing_to_dt = getFromToDT()
-    
-    query11 = f"""
-    SELECT PROCESS_TITLE as title,
-                GROUP_CONCAT(DISTINCT PROCESS_NAME ORDER BY PROCESS_NAME ASC) as browsingProcessName,
-                COUNT(*) as browsingUsage
-        FROM tblproworkingdetails
-        WHERE USER_ID = '{user}'
-        AND SYNC_TIME > '{existing_from_dt}'
-        AND SYNC_TIME < '{existing_to_dt}'
-        AND PRO_TYPE = 'BROWSING'
-        AND PROCESS_TITLE <> ''
-        GROUP BY PROCESS_TITLE
-        ORDER BY browsingUsage ASC;
-    """
+    return data 
 
-    with connection.cursor() as cursor:
-        cursor.execute(query11)
-        single_value = cursor.fetchall()
 
-    return single_value
-
-def processSessions(user):
- 
-    existing_from_dt, existing_to_dt = getFromToDT()
-    
-    query12 = f"""
-        SELECT PROCESS_TITLE as title,
-                    GROUP_CONCAT(DISTINCT PROCESS_NAME ORDER BY PROCESS_NAME ASC) as ProcessName,
-                    COUNT(*) as timeUsage,
-                    GROUP_CONCAT(DISTINCT RES1 ORDER BY RES1 ASC) as taskType
-            FROM tblproworkingdetails
-            WHERE USER_ID = '{user}'
-            AND SYNC_TIME > '{existing_from_dt}'
-            AND SYNC_TIME < '{existing_to_dt}'
-            GROUP BY PROCESS_TITLE
-            ORDER BY timeUsage ASC;
-
-    """
-
-    with connection.cursor() as cursor:
-        cursor.execute(query12)
-        single_value = cursor.fetchall()
-
-    return single_value
 
 
 

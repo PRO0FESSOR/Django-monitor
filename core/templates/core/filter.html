@@ -5,18 +5,11 @@
           {% csrf_token %}
           
           <div class="d-flex align-items-start mb-3">
-              {% comment %} <div class="p-2 bd-highlight">
-                <div class="input-group date" id="datepicker">
-                  <input type="text" class="form-control" id="date" placeholder={{data1}} name="currdate" />
-                  <span class="input-group-append">
-                    <span class="input-group-text bg-light d-block">
-                      <i class="fa fa-calendar"></i>
-                    </span>
-                  </span>
-                </div>           
-              </div> {% endcomment %}
               <div class="p-2 bd-highlight">
-                <input type="date" class="form-control" placeholder="From Date" name="currdate">
+                <input type="date" class="form-control" placeholder="{{data1}}" name="currdate">
+              </div>
+              <div class="p-2 bd-highlight">
+                <P style='font-size:27px;'>&#8596;</P>
               </div>
               <div class="p-2 bd-highlight">
                 <input type="date" class="form-control" placeholder="TO Date" name="currdating">
@@ -28,7 +21,7 @@
                   {% else %}
                   <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="toggler">
                   {% endif %}
-                  <label class="form-check-label" for="flexSwitchCheckChecked">Working Hours</label>
+                  <label class="form-check-label" for="flexSwitchCheckChecked">24 Hours</label>
                 </div>
               </div>
               <div class="p-2 bd-highlight">

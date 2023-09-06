@@ -3,34 +3,100 @@
 
 {% block content %}
 
+<div class="row mx-5">
+  <div class="col-sm-12">
+      <form class="row" action={% url 'home' %} method="POST" id="post-form">
+        {% csrf_token %}
+        
+        <div class="d-flex align-items-start mb-3">
+            <div class="p-2 bd-highlight">
+              <input type="text" class="form-control" placeholder="{{fromdate}}" name="currdate" onfocus="this.type='date'" onblur="this.type='text'" >
+            </div>
+            <div class="p-2 bd-highlight">
+              <P style='font-size:27px;'>&#8596;</P>
+            </div>
+            <div class="p-2 bd-highlight">
+              <input type="text" class="form-control" placeholder="{{todate}}" name="currdating" onfocus="this.type='date'" onblur="this.type='text'" >
+            </div>
+            <div class="p-2 bd-highlight">
+              <div class="form-check form-switch">
+                {%if data3 == "on" %}
+                <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="toggler" checked>
+                {% else %}
+                <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="toggler">
+                {% endif %}
+                <label class="form-check-label" for="flexSwitchCheckChecked">Working Hours</label>
+              </div>
+            </div>
+            <div class="p-2 bd-highlight">
+              <select class="form-select" aria-label="Find Employees" name="employee">
+                <option selected>Open this select menu</option>
+                
+                <option value="AISHWARYA_BACCHE">AISHWARYA_BACCHE</option>
+                <option value="AISHWARYA_GADGE">AISHWARYA_GADGE</option>
+                <option value="AJAY_APSHETTI">AJAY_APSHETTI</option>
+                <option value="AKSHATA_LOTEKAR">AKSHATA_LOTEKAR</option>
+                <option value="NIRUDHA_CHAULKAR">ANIRUDHA_CHAULKAR</option>
+                <option value="CHETAN_GORI">CHETAN_GORI</option>
+                <option value="GAURAV_PATHWARDHAN">GAURAV_PATHWARDHAN</option>
+                <option value="MANISHA_KALE">MANISHA_KALE</option>
+                <option value="MRINAL_SHRIVASTAVA">MRINAL_SHRIVASTAVA</option>
+                <option value="NIMESH_RADIA">NIMESH_RADIA</option>
+                <option value="PARMESHWAR_KALE">PARMESHWAR_KALE</option>
+                <option value="POORVI_PATIL">POORVI_PATIL</option>
+                <option value="PRATHAMESH_PATEL">PRATHAMESH_PATEL</option>
+                <option value="PRIYANKA_HARATKAR">PRIYANKA_HARATKAR</option>
+                <option value="RAHUL_KANOJIYA">RAHUL_KANOJIYA</option>
+                <option value="RAJ_RAMTEKKAR">RAJ_RAMTEKKAR</option>
+                <option value="ROSHAN_KAKADE">ROSHAN_KAKADE</option>
+                <option value="SAMIR_WARANG">SAMIR_WARANG</option>
+                <option value="SHREYA_PATIL">SHREYA_PATIL</option>
+                <option value="SHUBHAM_OMASE">SHUBHAM_OMASE</option>
+                <option value="SHUBHAM_PARAKH">SHUBHAM_PARAKH</option>
+                <option value="SUDHANSHU_KASHYAP">SUDHANSHU_KASHYAP</option>
+                <option value="TEJASWINI_SORTE">TEJASWINI_SORTE</option>
+                <option value="GAYATRI_PAWAR">GAYATRI_PAWAR</option>
+              </select>
+            </div>
+            <div class="p-2 bd-highlight">
+              <button class="btn btn-outline-success" type="submit">Search</button>
+            </div>
+        </div>
+      </form>
+    </div>
+</div>
+
+
+
 <div class="col-sm-12">
     <h3 class="my-5">Home Page</h3>
-    <div class="my-5">
+    {% comment %} <div class="my-5">
       Current date = {{data1}}<br>
       date with time = {{data2}}<br>
       status = {{data3}}<br>
-    </div>   
+    </div>    {% endcomment %}
 
     {% comment %} card code  {% endcomment %}
     
     <div class="row">
-      {% for name, counts in data4.items %}      
+      {% for data in data5 %}      
       <div class="col-sm-4 my-2">
-        <div class="card" style="border-radius: 50px;">
-          <div class="card-body">
-            <h1>{{name}}</h1>
+        <div class="card shadow p-3 mb-5 bg-body" style="border-radius: 50px;">
+          <div class="card-body ">
+            <h1>{{data.0}}</h1>
             <div class="d-flex justify-content-between" >
               <div style=" width: 500px; height: 200px;" class="my-5">
-                <h5>Idle Time : {{counts.PIdle}}</h5>
-                <h5>Pro Time : {{counts.PPRO}}</h5>
-                <h5>Unpro Time : {{counts.PUNPRO}}</h5>
-                <h5>LogIn Time: {{counts.login}}</h5>
-                <h5>LogOut Time: {{counts.logout}}</h5>
+                <h5>Pro Time : {{data.1}}</h5>
+                <h5>Unpro Time : {{data.2}}</h5>
+                <h5>Idle Time : {{data.3}}</h5>
+                <h5>LogIn Time: {{ data.4|slice:"11:20"}}</h5>
+                <h5>LogOut Time: {{ data.5|slice:"11:20" }}</h5>
+
                 </div>
-                <div  style="width: 500px; height: 200px;" id="chart{{ name }}"></div>
+                <div  style="width: 500px; height: 200px;" id="chart{{ data.0 }}"></div>
               </div>
-              <a href={% url 'description' user=name %} class="btn btn-primary">More..</a>
-            </div>            
+              <a href={% url 'description' user=data.0 %} class="btn btn-primary">More..</a>
+            </div>
         </div>
       </div> 
 
@@ -41,20 +107,19 @@
         var data = [
           {
             labels: ["Pro", "Unpro", "Idle"],
-            values: [{{ counts.PRO }}, {{ counts.UNPRO }}, {{ counts.Idle }}],
+            values: [{{ data.6 }}, {{ data.7 }}, {{ data.8 }}],
             type: "pie",
             hole: 0.5,
             marker: {
-              colors: ["#FF6384", "#36A2EB", "#FFCE56"],
+              colors: ["#3cb371", "#FFCE56", "#e86a47"],
             },
             textinfo: 'none', 
           },
         ];
 
         var layout = {
-          title: "{{name}} Chart",
-          width: 250,  
-          height: 250,
+          width: 300,  
+          height: 300,
           {% comment %} showlegend: false,  {% endcomment %}
         };
 
@@ -64,7 +129,7 @@
           staticPlot: true, // Disable interactivity like hover and zoom
         };
 
-        Plotly.newPlot("chart{{ name }}", data, layout,config);
+        Plotly.newPlot("chart{{ data.0 }}", data, layout,config);
       </script>
       {% endfor %}
       

@@ -24,6 +24,6 @@ urlpatterns = [
     path('logout/',views.user_logout,name="logout"),
     path('',views.home,name="home"),
     path('description/<str:user>/',views.description,name="description"),
-    path('user_data/<str:emp_value>/', views.user_data, name='user_data')
+    # path('abc/<int:flag>/',views.abc,name="abc")
     
 ]
