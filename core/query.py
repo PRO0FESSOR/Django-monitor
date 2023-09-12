@@ -44,7 +44,6 @@ def updateSelectedDate(from_date,to_date):
 def gettodate():
     existing_from_dt, existing_to_dt = getFromToDT()
     existing_to_date = existing_to_dt.split()[0]
-    print(existing_to_date)
     return existing_to_date
 
 def getSwitchStatus():

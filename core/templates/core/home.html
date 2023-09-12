@@ -70,71 +70,14 @@
 
 <div class="col-sm-12">
     <h3 class="my-5">Home Page</h3>
-    {% comment %} <div class="my-5">
+    <div class="my-5">
       Current date = {{data1}}<br>
       date with time = {{data2}}<br>
       status = {{data3}}<br>
-    </div>    {% endcomment %}
+    </div>   
 
-    {% comment %} card code  {% endcomment %}
-    
-    <div class="row">
-      {% for data in data5 %}      
-      <div class="col-sm-4 my-2">
-        <div class="card shadow p-3 mb-5 bg-body" style="border-radius: 50px;">
-          <div class="card-body ">
-            <h1>{{data.0}}</h1>
-            <div class="d-flex justify-content-between" >
-              <div style=" width: 500px; height: 200px;" class="my-5">
-                <h5>Pro Time : {{data.1}}</h5>
-                <h5>Unpro Time : {{data.2}}</h5>
-                <h5>Idle Time : {{data.3}}</h5>
-                <h5>LogIn Time: {{ data.4|slice:"11:20"}}</h5>
-                <h5>LogOut Time: {{ data.5|slice:"11:20" }}</h5>
-
-                </div>
-                <div  style="width: 500px; height: 200px;" id="chart{{ data.0 }}"></div>
-              </div>
-              <a href={% url 'description' user=data.0 %} class="btn btn-primary">More..</a>
-            </div>
-        </div>
-      </div> 
-
-      {% comment %} chart script {% endcomment %}
-
-      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-      <script>
-        var data = [
-          {
-            labels: ["Pro", "Unpro", "Idle"],
-            values: [{{ data.6 }}, {{ data.7 }}, {{ data.8 }}],
-            type: "pie",
-            hole: 0.5,
-            marker: {
-              colors: ["#3cb371", "#FFCE56", "#e86a47"],
-            },
-            textinfo: 'none', 
-          },
-        ];
-
-        var layout = {
-          width: 300,  
-          height: 300,
-          {% comment %} showlegend: false,  {% endcomment %}
-        };
-
-        var config = {
-          displayModeBar: false, // Hide the top-right corner options
-          responsive: true, // Make the chart responsive
-          staticPlot: true, // Disable interactivity like hover and zoom
-        };
-
-        Plotly.newPlot("chart{{ data.0 }}", data, layout,config);
-      </script>
-      {% endfor %}
-      
-    </div>
 </div>
 
 {% endblock content %}
+
 
