@@ -79,7 +79,13 @@ def home(request):
             if emp_value!="Open this select menu":
                 print(f"selected user -->{emp_value}")
                  
-   
+
+            with open('data.txt', 'w') as file:
+                file.write(f"Toggle Value: {toggle_value}\n")
+                file.write(f"From Date: {From_datee}\n")
+                file.write(f"To Date: {To_datee}\n")
+                file.write(f"Employee Value: {emp_value}\n")
+                
         return render(request,'core/home.html',{"data2":getFromToDT(),"fromdate":getSelectedDate(),"data3":getSwitchStatus(),"data6":emp_value,"todate":gettodate()})
         
     else:
